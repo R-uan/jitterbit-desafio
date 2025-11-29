@@ -1,6 +1,6 @@
 // src/routes/orders.ts
 import { Router } from "express";
-import * as orderController from "../controllers/orderController";
+import { OrderController } from "../controllers/orderController";
 
 const router = Router();
 
@@ -59,7 +59,7 @@ const router = Router();
  *       500:
  *         description: Internal server error
  */
-router.post("/", orderController.createOrder);
+router.post("/", OrderController.createOrder);
 
 /**
  * @openapi
@@ -82,7 +82,7 @@ router.post("/", orderController.createOrder);
  *       500:
  *         description: Internal server error
  */
-router.get("/list", orderController.getOrders);
+router.get("/list", OrderController.getOrders);
 
 /**
  * @openapi
@@ -107,7 +107,7 @@ router.get("/list", orderController.getOrders);
  *       500:
  *         description: Internal server error
  */
-router.get("/:orderId", orderController.getOrderById);
+router.get("/:orderId", OrderController.getOrderById);
 
 /**
  * @openapi
@@ -132,6 +132,6 @@ router.get("/:orderId", orderController.getOrderById);
  *       500:
  *         description: Internal server error
  */
-router.delete("/:orderId", orderController.deleteOrderById);
+router.delete("/:orderId", OrderController.deleteOrderById);
 
 export default router;

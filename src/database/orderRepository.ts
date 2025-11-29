@@ -15,10 +15,11 @@ export class OrderRepository {
    * @returns {Promise<Order>} The created order object
    * @throws {Error} If transaction fails
    */
-  public static async createOrder(input: ICreateOrderRequest) {
+  public static async createOrder(input: ICreateOrderRequest, userId: number) {
     const [createdOrder] = await database.$transaction([
       database.order.create({
         data: {
+          userId,
           value: input.valorTotal,
           orderId: input.numeroPedido,
           creationDate: input.dataCriacao,

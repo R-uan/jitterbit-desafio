@@ -13,8 +13,8 @@
       in {
         devShells.default = pkgs.mkShell {
           buildInputs = [
-            pkgs.yarn
             pkgs.prisma
+            pkgs.openssl
             pkgs.nodejs_20
             pkgs.prisma-engines
             pkgs.nodePackages.typescript

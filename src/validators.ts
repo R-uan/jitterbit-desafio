@@ -34,3 +34,15 @@ export const orderSchema = z.object({
   dataCriacao: z.coerce.date(),
   items: z.array(itemSchema),
 });
+
+export const signInSchema = z.object({
+  email: z.email(),
+  password: z.string().min(8).max(50),
+});
+
+export const signUpSchema = z.object({
+  email: z.email(),
+  password: z.string().min(8).max(50),
+  firstName: z.string().min(2).max(100),
+  lastName: z.string().min(2).max(100),
+});
