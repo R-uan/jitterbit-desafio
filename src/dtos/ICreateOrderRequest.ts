@@ -1,9 +1,9 @@
 export interface ICreateOrderRequest {
   numeroPedido: string;
   valorTotal: number;
-  dataCriacao: Date;
+  dataCriacao: Date; // This is a string in body
   items: {
-    iditem: number;
+    idItem: number; // this is a string in body
     valorItem: number;
     quantidadeItem: number;
   }[];

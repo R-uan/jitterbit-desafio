@@ -1,2 +1,3 @@
+/dist
 /node_modules
-/src/database/prisma/client
+/src/database/prisma/generated
