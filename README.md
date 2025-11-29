@@ -1,0 +1,16 @@
+# Checklist
+- [x] Criar um novo pedido.
+  - Method: POST
+  - Endpoint: `/order`
+- [x] Listar todos os pedidos.
+  - Method: GET
+  - Endpoint: `/order/list`
+- [x] Obter os dados do pedido passando por parâmetro na URL o número do pedido.
+  - Method: GET
+  - Endpoint: `/order/{orderId}`
+- [ ] Atualizar o pedido passando por parâmetro na url o número do pedido que será atualizado.
+  - Method: PATCH
+  - Endpoint: `/order/{orderId}`
+- [x] Delete o pedido passando por parâmetro na url o número do pedido que será deletado.
+  - Method: DELETE
+  - Endpoint: `/order/{orderId}`

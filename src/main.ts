@@ -64,9 +64,30 @@ app.post("/order", async (req, res) => {
       }
     } else {
       // Other errors that might require developer's attention.
-      console.log(`[ERROR] GET ORDER REQUEST ${{ error: err }}`);
+      console.log(`[ERROR] CREATE ORDER REQUEST ${{ error: err }}`);
       return res.status(500).send("Unexpected error");
     }
+  }
+});
+
+/**
+ * GET /order/list
+ * Retrieves all orders from the database.
+ * Optionally includes associated items for each order.
+ *
+ * @query {string} items - Optional. Set to "true" to include items array for each order.
+ *   Default: false (items not included)
+ *
+ * @returns {200} Array of order objects
+ * @returns {500} Internal server error
+ */
+app.get("/order/list", async (req, res) => {
+  try {
+    const result = await OrderRepository.findOrders(req.query.items == "true");
+    return res.status(200).json(result);
+  } catch (err) {
+    console.log(`[ERROR] CREATE ORDER REQUEST ${{ error: err }}`);
+    return res.status(500).send("Unexpected error");
   }
 });
 
@@ -89,6 +110,34 @@ app.get("/order/:orderId", async (req, res) => {
   } catch (err) {
     console.log(
       `[ERROR] GET ORDER REQUEST ${{
+        orderId,
+        error: err,
+      }}`,
+    );
+    return res.status(500).send("An unexpected error has occurred.");
+  }
+});
+
+/**
+ * DELETE /order/:orderId
+ * Deletes an order and its associated items by order ID.
+ *
+ * @param {string} orderId - The order ID to delete
+ *
+ * @returns {200} Deleted order object
+ * @returns {404} Order not found
+ * @returns {500} Internal server error
+ */
+app.delete("/order/:orderId", async (req, res) => {
+  const orderId = req.params.orderId;
+  try {
+    const result = await OrderRepository.deleteOrderById(orderId);
+    return result
+      ? res.status(200).json({ deleted: result })
+      : res.status(404).json(`Order: "${orderId}" not found.`);
+  } catch (err) {
+    console.log(
+      `[ERROR] DELETE ORDER REQUEST ${{
         orderId,
         error: err,
       }}`,

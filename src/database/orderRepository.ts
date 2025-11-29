@@ -74,7 +74,7 @@ export class OrderRepository {
    *
    * @returns {Promise<Order[]>} Array of all orders, or empty array if none exist
    */
-  public static async findOrders() {
-    return database.order.findMany();
+  public static async findOrders(items: boolean) {
+    return await database.order.findMany({ include: { items } });
   }
 }
