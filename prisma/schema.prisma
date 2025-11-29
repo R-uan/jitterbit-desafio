@@ -12,13 +12,30 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+model User {
+  userId       Int     @id @default(autoincrement())
+  email        String  @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  orders       Order[]
+
+  @@map("users")
 }
 
 model Order {
   orderId      String   @id
+  userId       Int
   value        Int
   creationDate DateTime
-  items        Item[]
+
+  items Item[]
+  user  User   @relation(fields: [userId], references: [userId])
+
+  @@map("orders")
 }
 
 model Item {
@@ -30,4 +47,6 @@ model Item {
   order Order @relation(fields: [orderId], references: [orderId])
 
   @@id([productId, orderId])
+
+  @@map("items")
 }
