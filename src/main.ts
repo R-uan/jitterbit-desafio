@@ -2,11 +2,32 @@ import z from "zod";
 import express from "express";
 import { orderSchema } from "./validators";
 import { OrderRepository } from "./database/orderRepository";
+import { PrismaClientKnownRequestError } from "./database/prisma/generated/internal/prismaNamespace";
 
 const app = express();
 app.use(express.json());
 
-// Creates a new Order in the database.
+/**
+ * POST /order
+ * Creates a new order in the database.
+ *
+ * @param {ICreateOrderRequest} body - The order data
+ *   - numeroPedido: string - Order number
+ *   - valorTotal: number - Total order value
+ *   - dataCriacao: string (ISO date) - Order creation date (parsed to Date)
+ *   - items: array of objects
+ *     - idItem: string|number - Item ID (parsed to number)
+ *     - valorItem: number - Item value
+ *     - quantidadeItem: number - Item quantity
+ *
+ * @returns {201} Created order object
+ * @returns {400} Validation error (invalid body format or types)
+ * @returns {409} Conflict - Duplicate orderId or null constraint violation
+ * @returns {500} Internal server error
+ *
+ * @throws {ZodError} If request body fails schema validation
+ * @throws {PrismaClientKnownRequestError} If database constraint is violated
+ */
 app.post("/order", async (req, res) => {
   try {
     // Parses and validates the request body, throwing an error in case of failure.
@@ -17,16 +38,47 @@ app.post("/order", async (req, res) => {
     return res.status(201).json(result);
   } catch (err) {
     if (err instanceof z.ZodError) {
+      // Handles validation logic errors.
       return res.status(400).json({ errors: (err as z.ZodError).issues });
+    } else if (err instanceof PrismaClientKnownRequestError) {
+      // Handles database errors that the client can resolve.
+      switch (err.code) {
+        // Handles duplicated orderId error.
+        case "P2002":
+          res.status(409).json({
+            error: {
+              reason: "Unique constraint failed",
+              message: `A record with this orderId already exists`,
+            },
+          });
+          break;
+        // Handles NULL primary key error.
+        case "P2011":
+          res.status(409).json({
+            error: {
+              reason: "Null constraint failed",
+              message: `Order requires an oderId`,
+            },
+          });
+          break;
+      }
     } else {
+      // Other errors that might require developer's attention.
       console.log(`[ERROR] GET ORDER REQUEST ${{ error: err }}`);
       return res.status(500).send("Unexpected error");
     }
   }
 });
 
-// Get order by id
-// /order/orderId
+/**
+ * GET /order/:orderId
+ * Retrieves an order by its ID.
+ *
+ * @param {string} orderId - The order ID to retrieve
+ * @returns {200} Order object if found
+ * @returns {404} Order not found
+ * @returns {500} Internal server error
+ */
 app.get("/order/:orderId", async (req, res) => {
   const orderId = req.params.orderId;
   try {
