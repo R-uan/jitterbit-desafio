@@ -1,5 +1,6 @@
 import database from "./database";
 import type { ICreateOrderRequest } from "../dtos/ICreateOrderRequest";
+import { IPatchOrderRequest } from "../dtos/IPatchOrderRequest";
 
 /**
  * OrderRepository
@@ -65,7 +66,8 @@ export class OrderRepository {
   public static async deleteOrderById(orderId: string) {
     try {
       return await database.order.delete({ where: { orderId: orderId } });
-    } catch {
+    } catch (err) {
+      console.log(err);
       return null;
     }
   }
@@ -77,5 +79,55 @@ export class OrderRepository {
    */
   public static async findOrders(items: boolean) {
     return await database.order.findMany({ include: { items } });
+  }
+
+  public static async updateOrder(orderId: string, data: IPatchOrderRequest) {
+    const [createdOrder] = await database.$transaction([
+      database.order.update({
+        where: { orderId },
+        data: {
+          value: data.valorTotal ?? undefined,
+          creationDate: data.dataCriacao ?? undefined,
+        },
+      }),
+
+      database.item.deleteMany({
+        where: {
+          productId: { in: data.removeItems ?? [] },
+          orderId,
+        },
+      }),
+
+      ...(data.addItems?.length
+        ? [
+            database.item.createMany({
+              data: data.addItems.map((item) => ({
+                orderId,
+                price: item.valorItem,
+                productId: item.idItem,
+                quantity: item.quantidadeItem,
+              })),
+            }),
+          ]
+        : []),
+
+      ...(data.updateItems?.length
+        ? data.updateItems.map((item) =>
+            database.item.update({
+              where: {
+                productId_orderId: {
+                  productId: item.idItem,
+                  orderId,
+                },
+              },
+              data: {
+                price: item.valorItem ?? undefined,
+                quantity: item.quantidadeItem ?? undefined,
+              },
+            }),
+          )
+        : []),
+    ]);
+    return createdOrder;
   }
 }

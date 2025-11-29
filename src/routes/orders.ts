@@ -134,4 +134,6 @@ router.get("/:orderId", OrderController.getOrderById);
  */
 router.delete("/:orderId", OrderController.deleteOrderById);
 
+router.patch("/:orderId", OrderController.patchOrderById);
+
 export default router;

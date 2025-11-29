@@ -1,6 +1,6 @@
 // src/controllers/orderController.ts
 import { z } from "zod";
-import { orderSchema } from "../validators";
+import { orderSchema, patchOrderSchema } from "../validators";
 import { Request, Response } from "express";
 import { OrderRepository } from "../database/orderRepository";
 import { PrismaClientKnownRequestError } from "../database/prisma/generated/internal/prismaNamespace";
@@ -77,17 +77,24 @@ export class OrderController {
     }
   }
 
+  public static async patchOrderById(req: Request, res: Response) {
+    const orderId = req.params.orderId;
+    try {
+      const body = patchOrderSchema.parse(req.body);
+      const result = OrderRepository.updateOrder(orderId, body);
+      return res.status(200).json(result);
+    } catch {}
+  }
+
   public static async deleteOrderById(req: Request, res: Response) {
     const orderId = req.params.orderId;
     try {
       const result = await OrderRepository.deleteOrderById(orderId);
       return result
         ? res.status(200).json({ deleted: result })
-        : res.status(404).json({ error: `Order: "${orderId}" not found.` });
+        : res.status(404).json({ error: `Order: '${orderId}' not found.` });
     } catch (err) {
-      console.log(
-        `[ERROR] DELETE ORDER REQUEST ${JSON.stringify({ orderId, error: err })}`,
-      );
+      console.log(`[ERROR] DELETE ORDER REQUEST ${{ orderId, error: err }}`);
       return res.status(500).send("An unexpected error has occurred.");
     }
   }

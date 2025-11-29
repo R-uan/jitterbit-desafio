@@ -46,3 +46,30 @@ export const signUpSchema = z.object({
   firstName: z.string().min(2).max(100),
   lastName: z.string().min(2).max(100),
 });
+
+export const patchOrderSchema = z.object({
+  valorTotal: z.number().optional(),
+  dataCriacao: z.coerce.date().optional(),
+
+  removeItems: z.array(z.number()).optional(),
+
+  updateItems: z
+    .array(
+      z.object({
+        idItem: z.coerce.number(), // converts string → number
+        valorItem: z.number().optional(),
+        quantidadeItem: z.number().optional(),
+      }),
+    )
+    .optional(),
+
+  addItems: z
+    .array(
+      z.object({
+        idItem: z.coerce.number(), // converts string → number
+        valorItem: z.number(),
+        quantidadeItem: z.number(),
+      }),
+    )
+    .optional(),
+});

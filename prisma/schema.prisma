@@ -43,7 +43,7 @@ model Item {
   quantity  Int
   price     Float
 
-  order Order @relation(fields: [orderId], references: [orderId])
+  order Order @relation(fields: [orderId], references: [orderId], onDelete: Cascade)
 
   @@id([productId, orderId])
   @@map("items")
