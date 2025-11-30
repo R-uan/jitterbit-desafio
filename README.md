@@ -187,9 +187,14 @@ docker-compose exec pgdb psql -U postgres -d order_db
 - [x] Obter os dados do pedido passando por parâmetro na URL o número do pedido.
   - Method: GET
   - Endpoint: `/order/{orderId}`
-- [ ] Atualizar o pedido passando por parâmetro na url o número do pedido que será atualizado.
+- [x] Atualizar o pedido passando por parâmetro na url o número do pedido que será atualizado.
   - Method: PATCH
   - Endpoint: `/order/{orderId}`
 - [x] Delete o pedido passando por parâmetro na url o número do pedido que será deletado.
   - Method: DELETE
   - Endpoint: `/order/{orderId}`
+
+#### Notes
+Por que tudo escrito em inglês?
+- Os materiais de aprendizado que eu consumo são 95% na língua inglesa, então meu raciocínio também segue esse padrão.
+- Esteticamente melhor por não ter acentos gramaticais.
