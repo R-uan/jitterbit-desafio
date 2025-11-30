@@ -1,5 +1,5 @@
-import { ISignUpRequest } from "../dtos/IAuthentication";
-import database from "./database";
+import database from "./database.js";
+import { ISignUpRequest } from "../dtos/IAuthentication.js";
 
 export class UserRepository {
   /**

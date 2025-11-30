@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { orderSchema, patchOrderSchema } from "../validators";
 import { Request, Response } from "express";
-import { OrderRepository } from "../database/orderRepository";
-import { PrismaClientKnownRequestError } from "../database/prisma/generated/internal/prismaNamespace";
+import { orderSchema, patchOrderSchema } from "../common/validators.js";
+import { OrderRepository } from "../database/orderRepository.js";
+import { PrismaClientKnownRequestError } from "../database/prisma/generated/internal/prismaNamespace.js";
 
 export class OrderController {
   /** Create a new order for the authenticated user */

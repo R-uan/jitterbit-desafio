@@ -1,24 +1,26 @@
 import "dotenv/config";
 import express from "express";
-import authRouter from "./routes/auth";
-import orderRouter from "./routes/orders";
-import { swaggerUi, specs } from "./swagger";
-import { authenticationMiddleware } from "./middlewares/authentication";
+import { getSecret } from "./common/jwt.js";
+import authRouter from "./routes/auth.js";
+import orderRouter from "./routes/orders.js";
+import { swaggerUi, specs } from "./common/swagger.js";
+import { authenticationMiddleware } from "./middlewares/authentication.js";
+import { loggingMiddleware } from "./middlewares/logging.js";
 
 const app = express();
 
 app.use(express.json());
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
-
+app.use(loggingMiddleware);
 app.use("/auth", authRouter);
 app.use("/order", authenticationMiddleware, orderRouter);
 
-const server = app.listen(3000, () => {
-  console.log("[DEBUG] Server listening on port 3000");
-  console.log(
-    "[DEBUG] Swagger API documentation: http://localhost:3000/api-docs",
-  );
+const port = process.env.PORT || 3000;
+const server = app.listen(port, () => {
+  console.log(`[DEBUG] Server listening on port ${port}`);
+  console.log(`[DEBUG] Swagger docs: http://localhost:${port}/api-docs`);
+  getSecret();
 });
 
 server.on("error", (err) => {

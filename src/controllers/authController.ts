@@ -1,11 +1,11 @@
 import z from "zod";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import config from "../config";
+import config from "../common/config.js";
 import { Request, Response } from "express";
-import { signInSchema, signUpSchema } from "../validators";
-import { UserRepository } from "../database/userRepository";
-import { PrismaClientKnownRequestError } from "../database/prisma/generated/internal/prismaNamespace";
+import { UserRepository } from "../database/userRepository.js";
+import { signInSchema, signUpSchema } from "../common/validators.js";
+import { PrismaClientKnownRequestError } from "../database/prisma/generated/internal/prismaNamespace.js";
 
 export class AuthenticationController {
   /**

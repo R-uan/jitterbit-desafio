@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from "express";
 import "dotenv/config";
+import config from "../common/config.js";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import config from "../config";
+import { Request, Response, NextFunction } from "express";
 
 interface CustomJwtPayload extends JwtPayload {
   userId: string;

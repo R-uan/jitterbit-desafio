@@ -1,6 +1,6 @@
-import database from "./database";
-import type { ICreateOrderRequest } from "../dtos/ICreateOrderRequest";
-import { IPatchOrderRequest } from "../dtos/IPatchOrderRequest";
+import database from "./database.js";
+import { IPatchOrderRequest } from "../dtos/IPatchOrderRequest.js";
+import type { ICreateOrderRequest } from "../dtos/ICreateOrderRequest.js";
 
 /**
  * OrderRepository
