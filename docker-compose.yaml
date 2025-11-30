@@ -1,11 +1,11 @@
 services:
-  postgres:
+  pgdb:
     image: postgres
-    container_name: postgres_dev
+    container_name: postgres_database
     environment:
+      POSTGRES_DB: order_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: dev_db
     ports:
       - "5432:5432"
     volumes:
@@ -15,5 +15,25 @@ services:
         limits:
           cpus: "1"
           memory: 1G
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
     restart: unless-stopped
+
+  app:
+    build: .
+    environment:
+      PORT: 3000 # If you change this port you need to remap it on ports and the Dockerfile EXPOSE
+      JWT_SECRET: "segsneao2012mldkmasd09dassd"
+      DATABASE_URL: "postgresql://postgres:postgres@pgdb:5432/order_db"
+    container_name: jitterbit-app-ruan-lopes
+    ports:
+      - "3000:3000" # this needs to match PORT
+    depends_on:
+      pgdb:
+        condition: service_healthy
+volumes:
+  pgsql:

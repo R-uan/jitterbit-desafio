@@ -1,6 +1,0 @@
-
-> jitterbit@1.0.0 dev
-> tsx src/main.ts
-
-[DEBUG] Server listening on port 3000
-[DEBUG] Swagger API documentation: http://localhost:3000/api-docs
