@@ -27,7 +27,7 @@ services:
     build: .
     environment:
       PORT: 3000 # If you change this port you need to remap it on ports and the Dockerfile EXPOSE
-      JWT_SECRET: "segsneao2012mldkmasd09dassd"
+      JWT_SECRET: "segsneao2012mldkmasd09dassd" # Eu coloquei esse 'segredo' aqui por conveniencia. Estou ciente que não de dever fazer isso em um cenario real;
       DATABASE_URL: "postgresql://postgres:postgres@pgdb:5432/order_db"
     container_name: jitterbit-app-ruan-lopes
     ports:
