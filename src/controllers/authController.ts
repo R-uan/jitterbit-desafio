@@ -8,27 +8,20 @@ import { UserRepository } from "../database/userRepository";
 import { PrismaClientKnownRequestError } from "../database/prisma/generated/internal/prismaNamespace";
 
 export class AuthenticationController {
-  /*
-   * This is simple enough to be done on a single function
-   * instead of using an dedicated service.
-   *
-   * - Validates request body checking email and password;
-   * - Fetches user associated with the given email;
-   * - Compares the stored password hash with the given password;
-   * - Generates token (JWT) if the password matches.
+  /**
+   * Authenticates a user and returns a JWT token.
+   * Validates credentials, compares password hash, and generates JWT on success.
    */
   public static async signIn(req: Request, res: Response) {
     try {
       const validData = signInSchema.parse(req.body);
       const user = await UserRepository.findUserByEmail(validData.email);
-
       if (user != null) {
         if (await bcrypt.compare(validData.password, user.passwordHash)) {
           const jwtoken = jwt.sign({ userId: user.userId }, config.JWT_SECRET);
           return res.status(200).json({ token: jwtoken });
         }
       }
-
       return res.status(401).json({
         error:
           "Authentication failed. Please check your email and/or password and try again.",
@@ -37,15 +30,15 @@ export class AuthenticationController {
       if (err instanceof z.ZodError) {
         return res.status(400).json({ error: err.message });
       } else {
-        console.log(`[ERROR] CREATE ORDER REQUEST ${{ error: err }}`);
+        console.error(`[ERROR] LOGIN REQUEST`, { error: err });
         return res.status(500).send("An unexpected error has occurred.");
       }
     }
   }
 
-  /*
-   * - Validates the request body checking: email, password, firstName and lastName
-   * - Creates user
+  /**
+   * Creates a new user account.
+   * Validates input, hashes password, and creates user in database.
    */
   public static async signUp(req: Request, res: Response) {
     try {
@@ -71,26 +64,22 @@ export class AuthenticationController {
       } else if (err instanceof PrismaClientKnownRequestError) {
         switch ((err as PrismaClientKnownRequestError).code) {
           case "P2002":
-            res.status(409).json({
+            return res.status(409).json({
               error: {
                 reason: "Unique constraint failed",
                 message: `An account with this email already exists`,
               },
             });
-            break;
           case "P2011":
-            res.status(409).json({
+            return res.status(409).json({
               error: {
                 reason: "Null constraint failed",
                 message: `User requires an email`,
               },
             });
-            break;
         }
       } else {
-        console.log(
-          `[ERROR] CREATE USER REQUEST ${JSON.stringify({ error: err })}`,
-        );
+        console.error(`[ERROR] CREATE USER REQUEST`, { error: err });
         return res.status(500).send("Unexpected error");
       }
     }

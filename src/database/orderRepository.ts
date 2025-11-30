@@ -12,9 +12,10 @@ export class OrderRepository {
    * Creates a new order with its associated items in a single transaction.
    * Ensures data consistency by rolling back both operations if either fails.
    *
-   * @param {ICreateOrderRequest} input
-   * @returns {Promise<Order>} The created order object
-   * @throws {Error} If transaction fails
+   * @param input - Order data including items array
+   * @param userId - ID of the user creating the order
+   * @returns The created order object
+   * @throws Error if transaction fails
    */
   public static async createOrder(input: ICreateOrderRequest, userId: number) {
     const [createdOrder] = await database.$transaction([
@@ -41,10 +42,8 @@ export class OrderRepository {
   /**
    * Retrieves a single order by its ID, including all associated items.
    *
-   * @param {string} id - The order ID (numeroPedido) to search for
-   *
-   * @returns {Promise<Order | null>} The order object with nested items array,
-   *   or null if no order is found
+   * @param id - The order ID to search for
+   * @returns The order object with nested items array, or null if not found
    */
   public static async findOrderById(id: string) {
     return await database.order.findFirst({
@@ -58,31 +57,36 @@ export class OrderRepository {
   /**
    * Deletes an order by its ID.
    *
-   * @param {string} orderId - The order ID (orderId) to delete
-   *
-   * @returns {Promise<Order | null>} The deleted order object if successful,
-   *   null if the order was not found or deletion failed
+   * @param orderId - The order ID to delete
+   * @returns The deleted order object
+   * @throws Error if order not found or deletion fails
    */
   public static async deleteOrderById(orderId: string) {
-    try {
-      return await database.order.delete({ where: { orderId: orderId } });
-    } catch (err) {
-      console.log(err);
-      return null;
-    }
+    return await database.order.delete({ where: { orderId: orderId } });
   }
 
   /**
    * Retrieves all orders from the database.
    *
-   * @returns {Promise<Order[]>} Array of all orders, or empty array if none exist
+   * @param items - Whether to include associated items in the results
+   * @returns Array of all orders with optional items
    */
   public static async findOrders(items: boolean) {
     return await database.order.findMany({ include: { items } });
   }
 
+  /**
+   * Updates an order and manages its items in a single transaction.
+   * Supports updating order fields, removing items, adding new items, and updating existing items.
+   *
+   * @param orderId - The order ID to update
+   * @param data - Update data including optional item operations
+   * @returns The updated order object
+   * @throws Error if transaction fails
+   */
   public static async updateOrder(orderId: string, data: IPatchOrderRequest) {
     const [createdOrder] = await database.$transaction([
+      // Update order fields
       database.order.update({
         where: { orderId },
         data: {
@@ -90,14 +94,14 @@ export class OrderRepository {
           creationDate: data.dataCriacao ?? undefined,
         },
       }),
-
+      // Remove specified items
       database.item.deleteMany({
         where: {
           productId: { in: data.removeItems ?? [] },
           orderId,
         },
       }),
-
+      // Add new items if provided
       ...(data.addItems?.length
         ? [
             database.item.createMany({
@@ -110,7 +114,7 @@ export class OrderRepository {
             }),
           ]
         : []),
-
+      // Update existing items if provided
       ...(data.updateItems?.length
         ? data.updateItems.map((item) =>
             database.item.update({

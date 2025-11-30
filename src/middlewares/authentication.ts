@@ -7,6 +7,12 @@ interface CustomJwtPayload extends JwtPayload {
   userId: string;
 }
 
+/**
+ * Authentication Middleware
+ *
+ * Validates JWT tokens in the Authorization header and extracts the user ID.
+ * This middleware must be applied to protected routes that require authentication.
+ */
 export function authenticationMiddleware(
   req: Request,
   res: Response,
