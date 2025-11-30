@@ -29,7 +29,7 @@ export function authenticationMiddleware(
     const userId = parseInt(decoded.userId);
     req.userId = userId;
   } catch {
-    return res.status(401).json({ error: "Authentication necessary" });
+    return res.status(401).json({ error: "Authentication required" });
   }
 
   next();

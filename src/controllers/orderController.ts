@@ -1,4 +1,3 @@
-// src/controllers/orderController.ts
 import { z } from "zod";
 import { orderSchema, patchOrderSchema } from "../validators";
 import { Request, Response } from "express";
@@ -15,7 +14,7 @@ export class OrderController {
       if (err instanceof z.ZodError) {
         const issues = (err as z.ZodError).issues.map((issue) => {
           return {
-            field: issue.path[0],
+            field: issue.path.join(".") || "unknown",
             message: issue.message,
           };
         });
@@ -40,9 +39,7 @@ export class OrderController {
             break;
         }
       } else {
-        console.log(
-          `[ERROR] CREATE ORDER REQUEST ${JSON.stringify({ error: err })}`,
-        );
+        console.log(`[ERROR] PATCH ORDER REQUEST ${{ error: err }}`);
         return res.status(500).send("Unexpected error");
       }
     }
@@ -83,7 +80,55 @@ export class OrderController {
       const body = patchOrderSchema.parse(req.body);
       const result = OrderRepository.updateOrder(orderId, body);
       return res.status(200).json(result);
-    } catch {}
+    } catch (err) {
+      // Zod validation error
+      if (err instanceof z.ZodError) {
+        const issues = err.issues.map((issue) => ({
+          field: issue.path.join(".") || "unknown",
+          message: issue.message,
+        }));
+
+        return res.status(400).json({ errors: issues });
+      }
+
+      // Prisma known errors
+      if (err instanceof PrismaClientKnownRequestError) {
+        switch (err.code) {
+          // Unique constraint
+          case "P2002":
+            return res.status(409).json({
+              error: {
+                reason: "Unique constraint failed",
+                message: "A record with this orderId already exists.",
+              },
+            });
+          // Foreign key constraint
+          case "P2003":
+            return res.status(409).json({
+              error: {
+                reason: "Foreign key constraint failed",
+                message: "One or more referenced items/orders do not exist.",
+              },
+            });
+          // Record not found
+          case "P2025":
+            return res.status(404).json({
+              error: {
+                reason: "Record not found",
+                message: "The order you're trying to update does not exist.",
+              },
+            });
+        }
+      }
+
+      console.error(`[ERROR] PATCH ORDER REQUEST`, err);
+      return res.status(500).json({
+        error: {
+          reason: "Unexpected error",
+          message: "Something went wrong while processing the update.",
+        },
+      });
+    }
   }
 
   public static async deleteOrderById(req: Request, res: Response) {

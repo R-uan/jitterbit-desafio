@@ -11,6 +11,11 @@ export class AuthenticationController {
   /*
    * This is simple enough to be done on a single function
    * instead of using an dedicated service.
+   *
+   * - Validates request body checking email and password;
+   * - Fetches user associated with the given email;
+   * - Compares the stored password hash with the given password;
+   * - Generates token (JWT) if the password matches.
    */
   public static async signIn(req: Request, res: Response) {
     try {
@@ -38,6 +43,10 @@ export class AuthenticationController {
     }
   }
 
+  /*
+   * - Validates the request body checking: email, password, firstName and lastName
+   * - Creates user
+   */
   public static async signUp(req: Request, res: Response) {
     try {
       const validData = signUpSchema.parse(req.body);
